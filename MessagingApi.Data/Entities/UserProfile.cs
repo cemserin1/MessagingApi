@@ -2,8 +2,15 @@
 
 namespace MessagingApi.Data.Entities
 {
-    public class UserProfile : User
-    {
+    [BsonCollection("UserProfile")]
+
+    public class UserProfile : Document
+    {   
         public List<string> BlockedUsers { get; set; }
+
+        public UserProfile()
+        {
+            BlockedUsers = new List<string>();
+        }
     }
 }

@@ -15,9 +15,9 @@ namespace MessagingApi.Service.Commands
     {
         public UserServiceRequest User { get; set; }
 
-        public RegisterUserCommand(UserServiceRequest _request, IMediator mediator)
+        public RegisterUserCommand(UserServiceRequest request)
         {
-            this.User = _request;
+            this.User = request;
         }
     }
 
@@ -37,7 +37,7 @@ namespace MessagingApi.Service.Commands
         {
             //check if username exists
             UserDetailsServiceResponse selectedUser = await _mediator.Send(new GetUserDetailsCommand(request.User.UserName), cancellationToken);
-            if (selectedUser == null)
+            if (selectedUser != null)
             {
                 return false;
             }

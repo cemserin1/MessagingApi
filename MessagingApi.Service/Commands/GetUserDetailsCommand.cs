@@ -30,8 +30,7 @@ namespace MessagingApi.Service.Commands
 
         public async Task<UserDetailsServiceResponse> Handle(GetUserDetailsCommand request, CancellationToken cancellationToken)
         {
-            //await _userRepository.InsertOneAsync(new User() { IsActive = true, Password = "12345", UserName = "armut" });
-            var resp = _userRepository.FindOneAsync(u => u.UserName == "armut").Result;
+            var resp = await _userRepository.FindOneAsync(u => u.UserName == request.UserName);
             return new UserDetailsServiceResponse(resp);
         }
     }

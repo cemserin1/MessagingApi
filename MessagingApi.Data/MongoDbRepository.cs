@@ -45,6 +45,12 @@ namespace MessagingApi.Data
             return _collection.Find(filterExpression).Project(projectionExpression).ToEnumerable();
         }
 
+        public Task<IEnumerable<TDocument>> FilterByAsync(Expression<Func<TDocument, bool>> filterExpression)
+        {
+            return Task.Run((() => _collection.Find(filterExpression).ToEnumerable()));
+        }
+
+
         public virtual TDocument FindOne(Expression<Func<TDocument, bool>> filterExpression)
         {
             return _collection.Find(filterExpression).FirstOrDefault();

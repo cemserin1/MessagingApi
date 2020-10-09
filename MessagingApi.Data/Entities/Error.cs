@@ -1,5 +1,7 @@
 ﻿namespace MessagingApi.Data.Entities
 {
+    [BsonCollection("Errors")]
+
     public class Error : Document
     {
         public int Code { get; set; }

@@ -13,6 +13,10 @@ namespace MessagingApi.Service.ServiceResponses
         public string UserId { get; set; }
         public DateTime DateCreated { get; set; }
 
+        public UserDetailsServiceResponse()
+        {
+            
+        }
         public UserDetailsServiceResponse(User u)
         {
             UserName = u.UserName;
