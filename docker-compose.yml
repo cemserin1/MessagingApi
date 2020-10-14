@@ -1,0 +1,11 @@
+version: '3.4'
+
+services:
+  messagingapi.api:
+    image: ${DOCKER_REGISTRY-}messagingapiapi
+    ports: 
+        - "8080:80"
+    build:
+      context: .
+      dockerfile: MessagingApi.Api/Dockerfile
+       

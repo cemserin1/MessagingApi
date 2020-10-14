@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace MessagingApi.Data
+namespace MessagingApi.Data.Interfaces
 {
     public interface IDocument
     {
@@ -12,6 +10,7 @@ namespace MessagingApi.Data
         [BsonRepresentation(BsonType.String)]
         ObjectId Id { get; set; }
 
-        DateTime CreatedAt { get; }
+        DateTime CreatedAt { get; set; }
+    } 
     }
-}
+

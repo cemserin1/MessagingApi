@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
-namespace MessagingApi.Api.Models
+namespace MessagingApi.Service.Models
 {
     public abstract class BaseResponseDto
     {
+        public string Message { get; set; }
+        public bool ShowToUser { get; set; }
+
         protected BaseResponseDto()
         {
             InfoList = new List<InfoDto>();

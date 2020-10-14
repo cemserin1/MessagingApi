@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using MessagingApi.Data.Entities;
+using MongoDB.Bson;
 
 namespace MessagingApi.Service.ServiceResponses
 {
@@ -15,7 +16,7 @@ namespace MessagingApi.Service.ServiceResponses
 
         public UserDetailsServiceResponse()
         {
-            
+
         }
         public UserDetailsServiceResponse(User u)
         {
@@ -24,6 +25,17 @@ namespace MessagingApi.Service.ServiceResponses
             IsActive = u.IsActive;
             DateCreated = u.CreatedAt;
             UserId = u.Id.ToString();
+        }
+
+        public User ToEntity()
+        {
+            return new User()
+            {
+                Id = ObjectId.Parse(UserId),
+                IsActive = IsActive,
+                Password = Password,
+                UserName = UserName
+            };
         }
     }
 }

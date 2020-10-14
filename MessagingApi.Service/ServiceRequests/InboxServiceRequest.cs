@@ -6,16 +6,5 @@ namespace MessagingApi.Service.ServiceRequests
 {
     public class InboxServiceRequest
     {
-        public string UserId { get; set; }
-
-        public InboxServiceRequest()
-        {
-            
-        }
-
-        public InboxServiceRequest(string userId)
-        {
-            UserId = userId;
-        }
     }
 }

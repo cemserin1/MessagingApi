@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using MessagingApi.Data.Interfaces;
 using MongoDB.Bson;
 using MongoDB.Driver;
 

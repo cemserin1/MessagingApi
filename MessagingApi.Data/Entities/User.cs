@@ -1,6 +1,6 @@
 ﻿namespace MessagingApi.Data.Entities
 {
-    [BsonCollection("users")]
+    [BsonCollection("Users")]
     public class User : Document
     {
         public string UserName { get; set; }

@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 using MediatR;
 using MessagingApi.Data;
 using MessagingApi.Data.Entities;
+using MessagingApi.Service.Models;
 using MessagingApi.Service.ServiceResponses;
+using MongoDB.Bson;
 
 namespace MessagingApi.Service.Queries
 {
@@ -29,25 +31,21 @@ namespace MessagingApi.Service.Queries
 
     public class GetUserInboxHandler : IRequestHandler<GetUserInboxQuery, InboxServiceResponse>
     {
-        private readonly IMongoDbRepository<Message> _messageRepository;
+        private readonly IMongoDbRepository<UserProfile> _userProfileRepository;
 
-        public GetUserInboxHandler(IMongoDbRepository<Message> messageRepository)
+        public GetUserInboxHandler(IMongoDbRepository<UserProfile> userProfileRepository)
         {
-            _messageRepository = messageRepository;
+            _userProfileRepository = userProfileRepository;
         }
 
         public async Task<InboxServiceResponse> Handle(GetUserInboxQuery request, CancellationToken cancellationToken)
         {
-            try
+            var selectedUser = await _userProfileRepository.FindOneAsync(u => u.Id == new ObjectId(request.UserId));
+            if (selectedUser == null)
             {
-                var messages = await _messageRepository.FilterByAsync(m => m.ToUserId == request.UserId);
-                return new InboxServiceResponse(true, messages.ToList());
+                throw new CustomException("user_not_found", true);
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return new InboxServiceResponse(true, null);
-            }
+            return new InboxServiceResponse() { Inbox = selectedUser.Inbox ?? new Inbox(), Message = "Success" };
         }
     }
 }

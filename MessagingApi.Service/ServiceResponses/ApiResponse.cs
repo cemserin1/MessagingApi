@@ -5,11 +5,9 @@ using MessagingApi.Service.Models;
 
 namespace MessagingApi.Service.ServiceResponses
 {
-    public class BlockUserResponse : BaseResponseDto
+    public class ApiResponse<T> : BaseResponseDto
     {
-        public BlockUserResponse()
-        {
-            
-        }
+        public T Data { get; set; }
+       
     }
 }

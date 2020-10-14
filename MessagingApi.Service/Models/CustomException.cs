@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net;
 
-namespace MessagingApi.Api.Models
+namespace MessagingApi.Service.Models
 {
     [Serializable]
     public class CustomException : Exception

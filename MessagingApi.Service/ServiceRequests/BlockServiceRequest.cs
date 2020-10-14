@@ -1,9 +1,11 @@
-﻿namespace MessagingApi.Service.ServiceRequests
+﻿using System.Text.Json.Serialization;
+
+namespace MessagingApi.Service.ServiceRequests
 {
     public class BlockServiceRequest
     {
         public string UserName { get; set; }
-
+        [JsonIgnore]
         public string BlockingUserId { get; set; }
 
         public BlockServiceRequest()

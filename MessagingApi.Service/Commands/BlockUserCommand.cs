@@ -4,6 +4,7 @@ using System.Reflection.Metadata;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentValidation;
 using MediatR;
 using MessagingApi.Data;
 using MessagingApi.Data.Entities;
@@ -25,54 +26,40 @@ namespace MessagingApi.Service.Commands
         }
     }
 
+    public class BlockUserCommandValidator : AbstractValidator<BlockUserCommand>
+    {
+        public BlockUserCommandValidator()
+        {
+            RuleFor(x => x.UserBlocked).Must(x => x == null || x.Length >= 6)
+                .WithMessage("username_must_be_at_least_6_characters");
+        }
+    }
+
     public class BlockUserCommandHandler : IRequestHandler<BlockUserCommand, BlockUserResponse>
     {
         private readonly IMediator _mediator;
-        private readonly IMongoDbRepository<User> _userRepository;
         private readonly IMongoDbRepository<UserProfile> _userProfileRepository;
-        public BlockUserCommandHandler(IMediator mediator, IMongoDbRepository<User> userRepository, IMongoDbRepository<UserProfile> userProfileRepository)
+        public BlockUserCommandHandler(IMediator mediator, IMongoDbRepository<UserProfile> userProfileRepository)
         {
             _mediator = mediator;
-            _userRepository = userRepository;
             _userProfileRepository = userProfileRepository;
         }
 
         public async Task<BlockUserResponse> Handle(BlockUserCommand request, CancellationToken cancellationToken)
         {
-            //check if blocked user exists
             var user = await _mediator.Send(new GetUserDetailsCommand(request.UserBlocked), cancellationToken);
             if (user == null)
             {
-                return new BlockUserResponse(false);
+                return new BlockUserResponse() { Message = "user_does_not_exist" };
             }
-            try
+            var userProfile = await _userProfileRepository.FindOneAsync(u => u.Id == ObjectId.Parse(request.BlockingUserId));
+            if (userProfile.BlockedUsers.Contains(user.UserId))
             {
-                var userProfile = await _userProfileRepository.FindOneAsync(u => u.Id == ObjectId.Parse(request.BlockingUserId));
-                if (userProfile == null)
-                {
-                    UserProfile profile = new UserProfile { Id = ObjectId.Parse(request.BlockingUserId) };
-                    profile.BlockedUsers.Add(user.UserId);
-                    await _userProfileRepository.InsertOneAsync(profile);
-                }
-                else
-                {
-                    var selectedUserProfile = await _userProfileRepository.FindOneAsync(u => u.Id.ToString() == request.BlockingUserId);
-                    if (selectedUserProfile.BlockedUsers.Contains(request.UserBlocked))
-                    {
-                        //user's already blocked
-                        return new BlockUserResponse(false);
-                    }
-                    selectedUserProfile.BlockedUsers.Add(user.UserId);
-                    await _userProfileRepository.ReplaceOneAsync(selectedUserProfile);
-                }
-                return new BlockUserResponse(true);
-
+                return new BlockUserResponse() { Message = "user_is_already_blocked" };
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return new BlockUserResponse(false);
-            }
+            userProfile.BlockedUsers.Add(user.UserId);
+            await _userProfileRepository.ReplaceOneAsync(userProfile);
+            return new BlockUserResponse() { Message = "Success" };
         }
     }
 }

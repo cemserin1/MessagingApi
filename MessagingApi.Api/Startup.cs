@@ -1,11 +1,15 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Net;
+using System.Reflection;
 using System.Text;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using MediatR;
 using MessagingApi.Api.Middlewares;
 using MessagingApi.Data;
+using MessagingApi.Service.Caching;
 using MessagingApi.Service.Commands;
+using MessagingApi.Service.Helpers;
 using MessagingApi.Service.Helpers.JWT;
 using MessagingApi.Service.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -17,6 +21,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using StackExchange.Redis;
 
 namespace MessagingApi.Api
 {
@@ -33,13 +38,35 @@ namespace MessagingApi.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers().AddFluentValidation();
-            services.Configure<MongoDbSettings>(Configuration.GetSection(nameof(MongoDbSettings)));
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin()
+                            .AllowAnyMethod()
+                            .AllowAnyHeader();
+                    });
+            }); services.Configure<MongoDbSettings>(Configuration.GetSection(nameof(MongoDbSettings)));
             services.AddSwaggerGen();
             services.AddSingleton<IMongoDbSettings>(sp => sp.GetRequiredService<IOptions<MongoDbSettings>>().Value);
             services.AddScoped(typeof(IMongoDbRepository<>), typeof(MongoDbRepository<>));
+            services.AddSingleton<ISerializerHelper, JsonSerializerHelper>();
+            services.AddSingleton<ICacheService, CacheService>();
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.InstanceName = "armut";
+                options.ConfigurationOptions = new ConfigurationOptions()
+                {
+                    EndPoints = { new DnsEndPoint("ec2-52-51-181-82.eu-west-1.compute.amazonaws.com", 10549) },
+                    Password = "pe22505c05d7e224d464024c399dfa05d8ce8710e31a5c08a6a8243872cad843c",
+                    ClientName = "h"
+            };      
+            });
 
+            services.AddSession(options => options.IdleTimeout = TimeSpan.FromMinutes(20));
             services.AddSingleton<IJwtSettings>(sp => sp.GetRequiredService<IOptions<JwtSettings>>().Value);
-
+            
             var appSettingsSection = Configuration.GetSection("AppSettings");
             services.Configure<JwtSettings>(appSettingsSection);
             var appSettings = appSettingsSection.Get<JwtSettings>();
@@ -75,11 +102,10 @@ namespace MessagingApi.Api
                             }
                         },
                         new string[] {}
-
                     }
                 });
             });
-
+            
             services.AddAuthentication(x =>
                 {
                     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -112,6 +138,7 @@ namespace MessagingApi.Api
             }
             app.UseMiddleware<ExceptionMiddleware>();
             app.UseSwagger();
+            
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "ArmutV1");
@@ -120,7 +147,10 @@ namespace MessagingApi.Api
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseRouting();
-
+            app.UseCors(builder => builder
+                .AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader());
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

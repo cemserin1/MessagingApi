@@ -4,6 +4,7 @@ using MediatR;
 using MessagingApi.Data;
 using MessagingApi.Data.Entities;
 using MessagingApi.Service.ServiceResponses;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace MessagingApi.Service.Commands
 {
@@ -21,6 +22,7 @@ namespace MessagingApi.Service.Commands
     public class GetUserDetailsCommandHandler : IRequestHandler<GetUserDetailsCommand, UserDetailsServiceResponse>
     {
         private readonly IMongoDbRepository<User> _userRepository;
+        
 
         public GetUserDetailsCommandHandler(IMongoDbRepository<User> userRepository)
         {
@@ -31,7 +33,7 @@ namespace MessagingApi.Service.Commands
         public async Task<UserDetailsServiceResponse> Handle(GetUserDetailsCommand request, CancellationToken cancellationToken)
         {
             var resp = await _userRepository.FindOneAsync(u => u.UserName == request.UserName);
-            return new UserDetailsServiceResponse(resp);
+            return resp == null ? null : new UserDetailsServiceResponse(resp);
         }
     }
 }

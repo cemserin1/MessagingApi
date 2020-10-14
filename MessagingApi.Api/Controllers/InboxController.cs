@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
+using MessagingApi.Service.Queries;
 using MessagingApi.Service.ServiceRequests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -25,7 +26,8 @@ namespace MessagingApi.Api.Controllers
         [Authorize]
         public async Task<IActionResult> Post([FromBody] InboxServiceRequest request)
         {
-            var result = await _mediator.Send(request);
+            var userId = User.Claims.First(c => c.Type == "UserId").Value;
+            var result = await _mediator.Send(new GetUserInboxQuery(userId));
             return Ok(result);
         }
     }

@@ -3,23 +3,22 @@ using System.Collections.Generic;
 using System.Reflection.Metadata;
 using System.Text;
 using MessagingApi.Data.Entities;
+using MessagingApi.Service.Models;
 
 namespace MessagingApi.Service.ServiceResponses
 {
-    public class InboxServiceResponse
+    public class InboxServiceResponse : BaseResponseDto
     {
-        public bool IsSuccess { get; set; }
-        public List<Message> Messages { get; set; }
+        public Inbox Inbox { get; set; }
+
+        public InboxServiceResponse(Inbox inbox)
+        {
+            Inbox = inbox;
+        }
 
         public InboxServiceResponse()
         {
-            Messages = new List<Message>();
-        }
-
-        public InboxServiceResponse(bool isSuccess, List<Message> messages)
-        {
-            Messages = messages;
-            IsSuccess = isSuccess;
+            
         }
     }
 }
